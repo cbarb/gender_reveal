@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gender Reveal Party</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --pink:       #FF85A1;
+      --pink-mid:   #FFB3C6;
+      --pink-light: #FFD6E2;
+      --pink-pale:  #FFF0F5;
+      --blue:       #5B9CFF;
+      --blue-mid:   #93BFFF;
+      --blue-light: #C5DEFF;
+      --blue-pale:  #EEF5FF;
+      --lavender:   #EDD6FF;
+      --cream:      #FFF8FB;
+      --text:       #4A3760;
+      --text-soft:  #9B87B8;
+      --white:      #FFFFFF;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── Language toggle ──────────────────────── */
+    #lang-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 200;
+      background: var(--white);
+      border-radius: 2rem;
+      padding: .3rem .4rem;
+      box-shadow: 0 2px 14px rgba(0,0,0,.12);
+      display: flex;
+      align-items: center;
+      gap: .1rem;
+    }
+
+    .lang-btn {
+      background: none;
+      border: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: .78rem;
+      font-weight: 800;
+      color: var(--text-soft);
+      cursor: pointer;
+      padding: .25rem .55rem;
+      border-radius: 1.5rem;
+      transition: background .2s, color .2s;
+      letter-spacing: .04em;
+    }
+    .lang-btn:hover { color: var(--text); }
+    .lang-btn.active { background: var(--pink-pale); color: var(--pink); }
+
+    .lang-sep { color: var(--text-soft); font-size: .7rem; opacity: .5; }
+
+    /* ── Floating CSS shapes ──────────────────── */
+    #particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .shape {
+      position: absolute;
+      bottom: -60px;
+      opacity: 0;
+      animation: floatUp linear infinite;
+      will-change: transform, opacity;
+    }
+
+    .s-circle  { border-radius: 50%; }
+    .s-diamond { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+    .s-star    { clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(0deg);    opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 1; }
+      100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* ── Confetti canvas ──────────────────────── */
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
+
+    /* ── Hero ─────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem 5rem;
+      background: linear-gradient(150deg, var(--pink-light) 0%, var(--blue-light) 100%);
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 80px;
+      background: var(--cream);
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+
+    .glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .5;
+      pointer-events: none;
+    }
+    .glow-pink { width: 480px; height: 480px; background: var(--pink-light); top: -80px; left: -80px; }
+    .glow-blue { width: 480px; height: 480px; background: var(--blue-light); bottom: -80px; right: -80px; }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .eyebrow {
+      font-size: .8rem;
+      font-weight: 800;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-bottom: 1.2rem;
+      animation: slideDown .8s ease both;
+    }
+
+    .hero-title {
+      font-family: 'Pacifico', cursive;
+      font-size: clamp(2.8rem, 9vw, 5.5rem);
+      line-height: 1.25;
+      margin-bottom: 1rem;
+      animation: slideDown .8s .15s ease both;
+    }
+
+    .txt-pink { color: var(--pink); }
+    .txt-blue { color: var(--blue); }
+    .txt-soft { color: var(--text-soft); }
+
+    .hero-sub {
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      font-weight: 600;
+      color: var(--text-soft);
+      margin-bottom: 2rem;
+      animation: slideDown .8s .3s ease both;
+    }
+
+    .hero-badge {
+      background: var(--white);
+      border-radius: 3rem;
+      padding: .75rem 2rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      box-shadow: 0 4px 24px rgba(0,0,0,.1);
+      animation: slideUp .8s .45s ease both;
+      margin-bottom: 3rem;
+    }
+
+    .scroll-hint {
+      font-size: 1.5rem;
+      color: var(--text-soft);
+      font-weight: 700;
+      animation: bob 2s ease-in-out infinite;
+    }
+
+    @keyframes bob       { 0%,100%{transform:translateY(0)} 50%{transform:translateY(9px)} }
+    @keyframes slideDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:none} }
+    @keyframes slideUp   { from{opacity:0;transform:translateY(20px)}  to{opacity:1;transform:none} }
+
+    /* ── Generic sections ─────────────────────── */
+    .section {
+      position: relative;
+      z-index: 1;
+      padding: 4rem 1.5rem;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-family: 'Pacifico', cursive;
+      font-size: clamp(1.8rem, 5vw, 2.4rem);
+      text-align: center;
+      margin-bottom: 2rem;
+      background: linear-gradient(90deg, var(--pink), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Scroll reveal ────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .65s ease, transform .65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── Detail cards ─────────────────────────── */
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 1.5rem;
+      padding: 1.75rem 1.25rem;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(100,60,150,.07);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 32px rgba(100,60,150,.14); }
+
+    .card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      margin: 0 auto .8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-icon svg { width: 22px; height: 22px; }
+    .icon-pink { background: var(--pink-pale); }
+    .icon-blue { background: var(--blue-pale); }
+    .icon-lav  { background: var(--lavender); }
+
+    .card-label { font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-soft); margin-bottom: .25rem; }
+    .card-value { font-size: 1rem; font-weight: 700; }
+    .card-sub   { font-size: .87rem; color: var(--text-soft); margin-top: .12rem; }
+
+    /* ── Click-me ribbon ─────────────────────── */
+    .card { position: relative; overflow: hidden; }
+    .click-ribbon {
+      position: absolute;
+      top: 18px;
+      right: -28px;
+      width: 110px;
+      background: var(--pink);
+      color: #fff;
+      font-size: .6rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 5px 0;
+      transform: rotate(40deg);
+      pointer-events: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,.18);
+    }
+
+    /* ── Wave dividers ────────────────────────── */
+    .wave { line-height: 0; overflow: hidden; position: relative; z-index: 1; }
+    .wave svg { display: block; width: 100%; }
+
+    /* ── Registry ─────────────────────────────── */
+    .registry-box {
+      background: linear-gradient(135deg, var(--pink-pale), var(--lavender) 50%, var(--blue-pale));
+      border-radius: 2rem;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(100,60,150,.07);
+    }
+    .registry-box p {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Buttons ──────────────────────────────── */
+    .btn {
+      display: inline-block;
+      padding: .85rem 2.5rem;
+      border-radius: 3rem;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: .02em;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .btn:hover  { transform: scale(1.05); box-shadow: 0 8px 26px rgba(0,0,0,.18); }
+    .btn:active { transform: scale(.97); }
+    .btn-pink { background: var(--pink); color: var(--white); }
+    .btn-blue { background: var(--blue); color: var(--white); }
+
+    /* ── RSVP form ────────────────────────────── */
+    .rsvp-box {
+      background: var(--white);
+      border-radius: 2rem;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 4px 24px rgba(100,60,150,.07);
+    }
+    .rsvp-intro {
+      text-align: center;
+      color: var(--text-soft);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 1.75rem;
+    }
+
+    .field { margin-bottom: 1.2rem; }
+    .field label { display: block; font-weight: 700; font-size: .93rem; margin-bottom: .4rem; }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: .75rem 1.1rem;
+      border: 2px solid var(--pink-light);
+      border-radius: 1rem;
+      font-family: 'Nunito', sans-serif;
+      font-size: .97rem;
+      color: var(--text);
+      background: var(--cream);
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--pink);
+      box-shadow: 0 0 0 3px rgba(255,133,161,.18);
+    }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239B87B8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+    }
+    .rsvp-box .btn { width: 100%; font-size: 1.08rem; padding: 1rem; margin-top: .4rem; }
+
+    /* ── Success state ────────────────────────── */
+    .success { display: none; text-align: center; padding: 1rem .5rem; }
+    .success.show { display: block; }
+
+    .success-circle {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink-light), var(--blue-light));
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: popIn .5s ease;
+    }
+    .success-circle svg { width: 38px; height: 38px; }
+
+    @keyframes popIn { 0%{transform:scale(0)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
+
+    .success h3 { font-family: 'Pacifico', cursive; font-size: 1.75rem; margin-bottom: .5rem; }
+    .success p  { color: var(--text-soft); font-size: 1rem; line-height: 1.6; }
+
+    /* ── Footer ───────────────────────────────── */
+    .footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 3rem 1.5rem 2.5rem;
+      color: var(--text-soft);
+      font-size: .9rem;
+      line-height: 1.8;
+    }
+
+    .footer-dots {
+      display: flex;
+      justify-content: center;
+      gap: .5rem;
+      margin-bottom: 1rem;
+    }
+    .footer-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+    .footer-dot:nth-child(odd)  { background: var(--pink-mid); }
+    .footer-dot:nth-child(even) { background: var(--blue-mid); }
+
+    /* ── Responsive ───────────────────────────── */
+    @media (max-width: 500px) {
+      .details-grid { grid-template-columns: 1fr 1fr; }
+      .rsvp-box { padding: 2rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── LANGUAGE TOGGLE ───────────────────────────── -->
+<div id="lang-toggle">
+  <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+  <span class="lang-sep">|</span>
+  <button class="lang-btn" id="btn-es" onclick="setLang('es')">ES</button>
+</div>
+
+<canvas id="confetti"></canvas>
+<div id="particles"></div>
+
+<!-- ─── HERO ─────────────────────────────────────── -->
+<section class="hero">
+  <div class="glow glow-pink"></div>
+  <div class="glow glow-blue"></div>
+
+  <div class="hero-inner">
+    <span class="eyebrow" data-i18n="eyebrow">You are invited</span>
+
+    <h1 class="hero-title">
+      <span data-i18n="hero-pre">Is it a</span><br>
+      <span class="txt-pink" data-i18n="hero-girl">Girl</span>
+      <span class="txt-soft" data-i18n="hero-or"> or </span>
+      <span class="txt-blue" data-i18n="hero-boy">Boy</span>?
+    </h1>
+
+    <p class="hero-sub" data-i18n="hero-sub">Join us for our baby's gender reveal party!</p>
+
+    <div class="hero-badge" data-i18n="hero-badge">Saturday &middot; July 18, 2026</div>
+
+    <div class="scroll-hint">&#8595;</div>
+  </div>
+</section>
+
+<!-- ─── DETAILS ───────────────────────────────────── -->
+<section class="section">
+  <h2 class="section-title reveal" data-i18n="details-title">Party Details</h2>
+
+  <div class="details-grid">
+    <div class="card reveal">
+      <div class="card-icon icon-pink">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FF85A1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </div>
+      <div class="card-label" data-i18n="lbl-date">Date</div>
+      <div class="card-value" data-i18n="val-date">Saturday</div>
+      <div class="card-sub" data-i18n="sub-date">June 13, 2026</div>
+    </div>
+
+    <div class="card reveal">
+      <div class="card-icon icon-blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#5B9CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div class="card-label" data-i18n="lbl-time">Time</div>
+      <div class="card-value">1:00 PM</div>
+      <div class="card-sub">&nbsp;</div>
+    </div>
+
+    <div class="card reveal" onclick="window.open('https://maps.app.goo.gl/S17TjmNs92Yqz66z6', '_blank')" style="cursor:pointer;">
+      <div class="click-ribbon">Click Me</div>
+      <div class="card-icon icon-pink">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FF85A1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </div>
+      <div class="card-label" data-i18n="lbl-location">Location</div>
+      <div class="card-value">Tropical Park</div>
+      <div class="card-sub" data-i18n="sub-location">Shelter 10</div>
+    </div>
+
+    <div class="card reveal">
+      <div class="card-icon icon-lav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#A47BC5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </div>
+      <div class="card-label" data-i18n="lbl-dress">Dress Code</div>
+      <div class="card-value" data-i18n="val-dress">Pink or Blue</div>
+      <div class="card-sub" data-i18n="sub-dress">Show your guess!</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── WAVE ──────────────────────────────────────── -->
+<div class="wave">
+  <svg viewBox="0 0 1440 64" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <path d="M0,40 C240,0 480,64 720,32 C960,0 1200,64 1440,40 L1440,64 L0,64Z" fill="#FFD6E2" opacity=".45"/>
+    <path d="M0,52 C360,12 720,52 1080,24 C1260,8 1380,48 1440,52 L1440,64 L0,64Z" fill="#C5DEFF" opacity=".35"/>
+  </svg>
+</div>
+
+<!-- ─── REGISTRY ──────────────────────────────────── -->
+<section class="section">
+  <h2 class="section-title reveal" data-i18n="registry-title">Baby Registry</h2>
+
+  <div class="registry-box reveal">
+    <p data-i18n-html="registry-p">
+      Your presence is our greatest gift.<br>
+      If you would like to shower our little one with something extra special,
+      we have put together a registry just for them!
+    </p>
+    <!-- Replace href with your real registry URL -->
+    <a href="https://www.amazon.com/baby-reg/karen-loureiro-october-2026-miami/27XC6JVEXALV7" target="_blank" rel="noopener" class="btn btn-pink" data-i18n="registry-btn">
+      View Our Registry
+    </a>
+  </div>
+</section>
+
+<!-- ─── WAVE ──────────────────────────────────────── -->
+<div class="wave">
+  <svg viewBox="0 0 1440 64" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <path d="M0,24 C240,64 480,0 720,32 C960,64 1200,0 1440,24 L1440,0 L0,0Z" fill="#C5DEFF" opacity=".35"/>
+    <path d="M0,12 C360,52 720,12 1080,40 C1260,56 1380,16 1440,12 L1440,0 L0,0Z" fill="#FFD6E2" opacity=".4"/>
+  </svg>
+</div>
+
+<!-- ─── RSVP ───────────────────────────────────────── -->
+<section class="section">
+  <h2 class="section-title reveal" data-i18n="rsvp-title">Will You Be There?</h2>
+
+  <div class="rsvp-box reveal">
+    <p class="rsvp-intro" data-i18n-html="rsvp-intro">
+      We would love to know you are coming!<br>
+      Please RSVP by <strong>June 5, 2026</strong>.
+    </p>
+
+    <form id="rsvpForm" novalidate>
+      <div class="field">
+        <label for="name" data-i18n="lbl-name">Your name(s)</label>
+        <input type="text" id="name" name="name"
+               placeholder="e.g. Sarah and John"
+               data-i18n-placeholder="ph-name" required>
+      </div>
+
+      <div class="field">
+        <label for="attending" data-i18n="lbl-attending">Will you be attending?</label>
+        <select id="attending" name="attending" required>
+          <option value="" disabled selected data-i18n="opt-attending-0">Choose an option</option>
+          <option value="yes"   data-i18n="opt-attending-1">Yes, we cannot wait!</option>
+          <option value="maybe" data-i18n="opt-attending-2">Maybe &mdash; let me check</option>
+          <option value="no"    data-i18n="opt-attending-3">Sorry, we cannot make it</option>
+        </select>
+      </div>
+
+      <div class="field" id="guestField">
+        <label for="guests" data-i18n="lbl-guests">Number of guests</label>
+        <input type="number" id="guests" name="guests" min="1" max="10" placeholder="1" value="1">
+      </div>
+
+      <div class="field">
+        <label for="guess" data-i18n="lbl-guess">Your guess</label>
+        <select id="guess" name="guess">
+          <option value="" disabled selected data-i18n="opt-guess-0">I think it is a&hellip;</option>
+          <option value="girl"     data-i18n="opt-guess-1">Girl!</option>
+          <option value="boy"      data-i18n="opt-guess-2">Boy!</option>
+          <option value="surprise" data-i18n="opt-guess-3">I will be surprised!</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="message" data-i18n="lbl-note">Leave a little note (optional)</label>
+        <textarea id="message" name="message" rows="2"
+                  placeholder="We cannot wait to celebrate with you!"
+                  data-i18n-placeholder="ph-note"
+                  style="resize:vertical"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-pink" id="submitBtn" data-i18n="btn-submit">Send my RSVP</button>
+    </form>
+
+    <div class="success" id="successMsg">
+      <div class="success-circle" id="successCircle"></div>
+      <h3 id="successTitle"></h3>
+      <p id="successBody"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer-dots">
+    <div class="footer-dot"></div>
+    <div class="footer-dot"></div>
+    <div class="footer-dot"></div>
+    <div class="footer-dot"></div>
+    <div class="footer-dot"></div>
+  </div>
+  <!-- Update with your names -->
+  <p data-i18n-html="footer-main">Made with love by <strong>Mom &amp; Dad</strong></p>
+  <p style="margin-top:.25rem;font-size:.85rem" data-i18n="footer-sub">We cannot wait to meet you, little one.</p>
+</footer>
+
+<script>
+  /* ── Translations ──────────────────────────────── */
+  var translations = {
+    en: {
+      "page-title":      "Gender Reveal Party",
+      "eyebrow":         "You are invited",
+      "hero-pre":        "Is it a",
+      "hero-girl":       "Girl",
+      "hero-or":         " or ",
+      "hero-boy":        "Boy",
+      "hero-sub":        "Join us for our baby's gender reveal party!",
+      "hero-badge":      "Saturday \u00b7 June 13, 2026",
+      "details-title":   "Party Details",
+      "lbl-date":        "Date",
+      "val-date":        "Saturday",
+      "sub-date":        "June 13, 2026",
+      "lbl-time":        "Time",
+      "lbl-location":    "Location",
+      "sub-location":    "Shelter 10",
+      "lbl-dress":       "Dress Code",
+      "val-dress":       "Pink or Blue",
+      "sub-dress":       "Show your guess!",
+      "registry-title":  "Baby Registry",
+      "registry-p":      "Your presence is our greatest gift.<br>If you would like to shower our little one with something extra special, we have put together a registry just for them!",
+      "registry-btn":    "View Our Registry",
+      "rsvp-title":      "Will You Be There?",
+      "rsvp-intro":      "We would love to know you are coming!<br>Please RSVP by <strong>June 5, 2026</strong>.",
+      "lbl-name":        "Your name(s)",
+      "ph-name":         "e.g. Sarah and John",
+      "lbl-attending":   "Will you be attending?",
+      "opt-attending-0": "Choose an option",
+      "opt-attending-1": "Yes, we cannot wait!",
+      "opt-attending-2": "Maybe \u2014 let me check",
+      "opt-attending-3": "Sorry, we cannot make it",
+      "lbl-guests":      "Number of guests",
+      "lbl-guess":       "Your guess",
+      "opt-guess-0":     "I think it is a\u2026",
+      "opt-guess-1":     "Girl!",
+      "opt-guess-2":     "Boy!",
+      "opt-guess-3":     "I will be surprised!",
+      "lbl-note":        "Leave a little note (optional)",
+      "ph-note":         "We cannot wait to celebrate with you!",
+      "btn-submit":      "Send my RSVP",
+      "btn-sending":     "Sending...",
+      "footer-main":     "Made with love by <strong>Mom &amp; Dad</strong>",
+      "footer-sub":      "We cannot wait to meet you, little one.",
+      "ok-title":        "See you there!",
+      "ok-body":         "We are so excited to celebrate with you.",
+      "no-title":        "We will miss you!",
+      "no-body":         "Thank you for letting us know. We will be thinking of you!"
+    },
+    es: {
+      "page-title":      "La Revelaci\u00f3n del Sexo",
+      "eyebrow":         "Est\u00e1s invitado",
+      "hero-pre":        "\u00bfEs una",
+      "hero-girl":       "Ni\u00f1a",
+      "hero-or":         " o un ",
+      "hero-boy":        "Ni\u00f1o",
+      "hero-sub":        "\u00danete a nosotros para la revelaci\u00f3n del sexo de nuestro beb\u00e9!",
+      "hero-badge":      "S\u00e1bado \u00b7 13 de junio, 2026",
+      "details-title":   "Detalles de la Fiesta",
+      "lbl-date":        "Fecha",
+      "val-date":        "S\u00e1bado",
+      "sub-date":        "13 de junio, 2026",
+      "lbl-time":        "Hora",
+      "lbl-location":    "Lugar",
+      "sub-location":    "Shelter 10",
+      "lbl-dress":       "Vestimenta",
+      "val-dress":       "Rosa o Azul",
+      "sub-dress":       "\u00a1Muestra tu predicci\u00f3n!",
+      "registry-title":  "Lista de Regalos",
+      "registry-p":      "Tu presencia es nuestro mayor regalo.<br>\u00a1Si deseas consentir a nuestro beb\u00e9 con algo especial, hemos preparado una lista de regalos para ti!",
+      "registry-btn":    "Ver Nuestra Lista",
+      "rsvp-title":      "\u00bfVendr\u00e1s?",
+      "rsvp-intro":      "\u00a1Nos encantar\u00eda saber que vendr\u00e1s!<br>Por favor confirma antes del <strong>5 de julio, 2026</strong>.",
+      "lbl-name":        "Tu nombre(s)",
+      "ph-name":         "ej. Ana y Juan",
+      "lbl-attending":   "\u00bfAsistir\u00e1s?",
+      "opt-attending-0": "Elige una opci\u00f3n",
+      "opt-attending-1": "\u00a1S\u00ed, no podemos esperar!",
+      "opt-attending-2": "Quiz\u00e1s \u2014 d\u00e9jame revisar",
+      "opt-attending-3": "Lo siento, no podemos ir",
+      "lbl-guests":      "N\u00famero de invitados",
+      "lbl-guess":       "Tu predicci\u00f3n",
+      "opt-guess-0":     "Creo que es\u2026",
+      "opt-guess-1":     "\u00a1Ni\u00f1a!",
+      "opt-guess-2":     "\u00a1Ni\u00f1o!",
+      "opt-guess-3":     "\u00a1Me sorprender\u00e9!",
+      "lbl-note":        "Deja una nota (opcional)",
+      "ph-note":         "\u00a1No podemos esperar para celebrar contigo!",
+      "btn-submit":      "Enviar mi RSVP",
+      "btn-sending":     "Enviando...",
+      "footer-main":     "Hecho con amor por <strong>Mam\u00e1 y Pap\u00e1</strong>",
+      "footer-sub":      "No podemos esperar para conocerte, peque\u00f1\u00edn.",
+      "ok-title":        "\u00a1Nos vemos all\u00e1!",
+      "ok-body":         "Estamos muy emocionados de celebrar contigo.",
+      "no-title":        "\u00a1Te echaremos de menos!",
+      "no-body":         "\u00a1Gracias por avisarnos. Estaremos pensando en ti!"
+    }
+  };
+
+  var urlLang = new URLSearchParams(window.location.search).get('lang');
+  var currentLang = (urlLang && translations[urlLang]) ? urlLang : (localStorage.getItem('lang') || 'en');
+
+  function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    document.documentElement.lang = lang;
+    document.title = translations[lang]['page-title'];
+    var u = new URL(window.location);
+    u.searchParams.set('lang', lang);
+    history.replaceState(null, '', u);
+
+    var t = translations[lang];
+
+    // Plain text elements
+    var textEls = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < textEls.length; i++) {
+      var key = textEls[i].getAttribute('data-i18n');
+      if (t[key] !== undefined) { textEls[i].textContent = t[key]; }
+    }
+
+    // HTML elements (contain tags like <br>, <strong>)
+    var htmlEls = document.querySelectorAll('[data-i18n-html]');
+    for (var i = 0; i < htmlEls.length; i++) {
+      var key = htmlEls[i].getAttribute('data-i18n-html');
+      if (t[key] !== undefined) { htmlEls[i].innerHTML = t[key]; }
+    }
+
+    // Placeholder attributes
+    var phEls = document.querySelectorAll('[data-i18n-placeholder]');
+    for (var i = 0; i < phEls.length; i++) {
+      var key = phEls[i].getAttribute('data-i18n-placeholder');
+      if (t[key] !== undefined) { phEls[i].placeholder = t[key]; }
+    }
+
+    // Active button state
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+  }
+
+  // Apply saved language on load
+  setLang(currentLang);
+
+  /* ── Floating CSS shapes ───────────────────────── */
+  (function () {
+    var container = document.getElementById('particles');
+    var colors = ['#FFB3C6', '#B3D4FF', '#D9BFFF', '#FFCAD4', '#A8D8FF'];
+    var shapes = ['s-circle', 's-diamond', 's-star'];
+
+    for (var i = 0; i < 26; i++) {
+      var el    = document.createElement('div');
+      var shape = shapes[Math.floor(Math.random() * shapes.length)];
+      var color = colors[Math.floor(Math.random() * colors.length)];
+      var size  = 8 + Math.random() * 16;
+      var dur   = 11 + Math.random() * 14;
+      var delay = Math.random() * dur;
+
+      el.className = 'shape ' + shape;
+      el.style.left              = (Math.random() * 100) + 'vw';
+      el.style.width             = size + 'px';
+      el.style.height            = size + 'px';
+      el.style.background        = color;
+      el.style.opacity           = String(0.18 + Math.random() * 0.2);
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay    = '-' + delay + 's';
+
+      container.appendChild(el);
+    }
+  }());
+
+  /* ── Scroll reveal ─────────────────────────────── */
+  (function () {
+    var items = document.querySelectorAll('.reveal');
+
+    if (!window.IntersectionObserver) {
+      for (var i = 0; i < items.length; i++) { items[i].classList.add('visible'); }
+      return;
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) {
+          entries[i].target.classList.add('visible');
+          observer.unobserve(entries[i].target);
+        }
+      }
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    for (var i = 0; i < items.length; i++) { observer.observe(items[i]); }
+  }());
+
+  /* ── Hide guest field when not attending ───────── */
+  document.getElementById('attending').addEventListener('change', function () {
+    document.getElementById('guestField').style.display = (this.value === 'no') ? 'none' : '';
+  });
+
+  /* ── Confetti ──────────────────────────────────── */
+  var canvas  = document.getElementById('confetti');
+  var ctx     = canvas.getContext('2d');
+  var pieces  = [];
+  var running = false;
+  var confettiColors = ['#FFB3C6', '#B3D4FF', '#FFD6E0', '#D6EAFF', '#EDD6FF', '#FFEB99'];
+
+  function resizeCanvas() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function burst() {
+    pieces = [];
+    for (var i = 0; i < 180; i++) {
+      pieces.push({
+        x:     Math.random() * canvas.width,
+        y:     -20 - Math.random() * canvas.height * 0.4,
+        w:     7 + Math.random() * 9,
+        h:     5 + Math.random() * 6,
+        vy:    2.2 + Math.random() * 4,
+        vx:    (Math.random() - 0.5) * 3,
+        rot:   Math.random() * 360,
+        rspd:  (Math.random() - 0.5) * 9,
+        color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+        alpha: 1
+      });
+    }
+    if (!running) { running = true; animateTick(); }
+  }
+
+  function animateTick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var alive = false;
+    for (var i = 0; i < pieces.length; i++) {
+      var p = pieces[i];
+      p.y   += p.vy;
+      p.x   += p.vx;
+      p.rot += p.rspd;
+      if (p.y > canvas.height * 0.8) { p.alpha -= 0.025; }
+      if (p.alpha > 0 && p.y < canvas.height) { alive = true; }
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    if (alive) {
+      requestAnimationFrame(animateTick);
+    } else {
+      running = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  /* ── RSVP form submit ──────────────────────────── */
+  var SHEET_URL = 'https://script.google.com/macros/s/AKfycbz7E7g93PDWMK5sDPXjkhWEHsAho32_Vy4rpc9EVlfwSrT9PSkjrT3HXPexHF8vCG-prw/exec';
+
+  document.getElementById('rsvpForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var t        = translations[currentLang];
+    var btn      = document.getElementById('submitBtn');
+    var attending = document.getElementById('attending').value;
+
+    btn.disabled    = true;
+    btn.textContent = t['btn-sending'];
+
+    var formData = new FormData();
+    formData.append('name',      document.getElementById('name').value);
+    formData.append('attending', attending);
+    formData.append('guests',    document.getElementById('guests').value || '');
+    formData.append('guess',     document.getElementById('guess').value  || '');
+    formData.append('message',   document.getElementById('message').value);
+
+    fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', body: formData })
+      .catch(function () {})
+      .finally(function () {
+        document.getElementById('rsvpForm').style.display = 'none';
+
+        var circle = document.getElementById('successCircle');
+        var title  = document.getElementById('successTitle');
+        var body   = document.getElementById('successBody');
+
+        if (attending === 'yes' || attending === 'maybe') {
+          circle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#FF85A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+          title.textContent = t['ok-title'];
+          body.textContent  = t['ok-body'];
+          burst();
+        } else {
+          circle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#5B9CFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="#D9EEFF"/></svg>';
+          title.textContent = t['no-title'];
+          body.textContent  = t['no-body'];
+        }
+
+        document.getElementById('successMsg').classList.add('show');
+      });
+  });
+</script>
+</body>
+</html>
